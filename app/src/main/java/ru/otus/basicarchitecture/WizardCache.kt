@@ -8,15 +8,15 @@ import dagger.hilt.android.scopes.ActivityRetainedScoped
 import java.time.LocalDate
 
 data class WizardUser(
-    var name: String,
-    var lastname: String,
-    var birthday: LocalDate
+    val name: String,
+    val lastname: String,
+    val birthday: LocalDate
 )
 
 data class WizardAddress(
-    var country: String,
-    var city: String,
-    var address: String
+    val country: String,
+    val city: String,
+    val address: String
 )
 
 fun WizardAddress.toText(): String {
@@ -32,10 +32,10 @@ object WizardModule {
 }
 
 class WizardCache {
-    private lateinit var user: WizardUser
-    private lateinit var address: WizardAddress
+    private var user: WizardUser = WizardUser("", "", LocalDate.now())
+    private var address: WizardAddress = WizardAddress("", "", "")
 
-    private lateinit var hobbies: List<String>
+    private var hobbies: Set<String> = emptySet()
 
     fun setNewUser(newUser: WizardUser) {
         user = newUser
@@ -45,7 +45,7 @@ class WizardCache {
         address = newAddress
     }
 
-    fun setHobbies(newHobbies: List<String>) {
+    fun setHobbies(newHobbies: Set<String>) {
         hobbies = newHobbies
     }
 
@@ -57,7 +57,7 @@ class WizardCache {
         return address
     }
 
-    fun getHobbies(): List<String> {
+    fun getHobbies(): Set<String> {
         return hobbies
     }
 }

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -47,24 +48,35 @@ class FragmentUser : Fragment() {
     private fun setupBindings() {
         with(binding) {
             btnPersonNext.setOnClickListener {
-                viewModel.setUserData(txtName.text.toString(), txtSurname.text.toString())
+                viewModel.saveUserToWizard()
                 navController.navigate(R.id.action_person_to_address)
             }
             txtBirthday.setOnClickListener {
                 showDatePicker()
             }
             lifecycleScope.launch {
-                viewModel.isBirthdayValid.collect { isValid ->
+                viewModel.isUserBirthdayValid.collect { isValid ->
                     btnPersonNext.isEnabled = isValid
                     txt18Yo.visibility = if (isValid) View.GONE else View.VISIBLE
                 }
             }
+
+            viewModel.initUser()
+            viewModel.user.value.let {
+                txtName.setText(it?.name)
+                txtSurname.setText(it?.lastname)
+                val birthdayResult = it?.birthday?.toText()
+                birthdayResult?.onSuccess { date -> txtBirthday.setText(date) }
+            }
+
+            txtName.doAfterTextChanged { updateUser() }
+            txtSurname.doAfterTextChanged { updateUser() }
         }
     }
 
     private fun showDatePicker() {
         val calendar = Calendar.getInstance()
-        val currentBirthday = viewModel.birthday.value ?: LocalDate.now()
+        val currentBirthday = viewModel.user.value?.birthday ?: LocalDate.now()
         calendar.set(
             currentBirthday.year,
             currentBirthday.monthValue - 1,
@@ -99,6 +111,10 @@ class FragmentUser : Fragment() {
                 }
         }
         datePicker.show(parentFragmentManager, "DATE_PICKER")
+    }
+
+    private fun updateUser() {
+        viewModel.setUser(binding.txtName.text.toString(), binding.txtSurname.text.toString())
     }
 
 }

@@ -1,13 +1,12 @@
 package ru.otus.basicarchitecture.ui.user
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import ru.otus.basicarchitecture.WizardCache
 import ru.otus.basicarchitecture.WizardUser
@@ -17,28 +16,35 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(private val wizardCache: WizardCache) : ViewModel() {
-    private val _birthday = MutableStateFlow<LocalDate?>(null)
-    var birthday = _birthday.asStateFlow()
+    private var _user = MutableStateFlow<WizardUser?>(null)
+    val user = _user.asStateFlow()
 
-    val isBirthdayValid = _birthday.combine(_birthday) { day, _ ->
-        Period.between(day ?: LocalDate.now(), LocalDate.now()).years >= 18
+    val isUserBirthdayValid = _user.map { user ->
+        Period.between(user?.birthday ?: LocalDate.now(), LocalDate.now()).years >= 18
     }.stateIn(
         initialValue = false,
-        scope = CoroutineScope(Dispatchers.Default),
+        scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000L)
     )
 
-    fun setUserData(name: String, surname: String) {
-        wizardCache.setNewUser(
-            WizardUser(
-                name = name,
-                lastname = surname,
-                birthday = _birthday.value ?: LocalDate.now()
-            )
+    fun setBirthday(newBirthday: LocalDate) {
+        _user.value = _user.value?.copy(birthday = newBirthday) ?: WizardUser("", "", newBirthday)
+    }
+
+    fun setUser(userName: String, userSurname: String) {
+        _user.value = _user.value?.copy(name = userName, lastname = userSurname) ?: WizardUser(
+            userName,
+            userSurname,
+            LocalDate.now()
         )
     }
 
-    fun setBirthday(newDate: LocalDate) {
-        _birthday.value = newDate
+    fun initUser() {
+        _user.value = wizardCache.getUser()
     }
+
+    fun saveUserToWizard() {
+        _user.value?.let { wizardCache.setNewUser(it) }
+    }
+
 }

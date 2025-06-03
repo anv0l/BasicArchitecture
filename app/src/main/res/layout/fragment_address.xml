@@ -19,7 +19,7 @@
             android:id="@+id/txt_country"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Country" />
+            android:text="" />
     </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -36,7 +36,7 @@
             android:id="@+id/txt_city"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="City" />
+            android:text="" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -52,7 +52,7 @@
             android:id="@+id/txt_address"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Address" />
+            android:text="" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton

@@ -1,7 +1,7 @@
 package ru.otus.basicarchitecture.data
 
 class MockData {
-    val hobbies = listOf(
+    val hobbies = setOf(
         "Reading",
         "Writing",
         "Painting",

@@ -4,11 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import ru.otus.basicarchitecture.R
 import ru.otus.basicarchitecture.databinding.FragmentTagsBinding
 import ru.otus.basicarchitecture.helpers.ChipLoader
@@ -43,15 +44,29 @@ class FragmentTags : Fragment() {
 
     private fun setupBindings() {
         with(binding) {
+
             btnTagsNext.setOnClickListener {
-                val hobbies =
-                    chipHobbiesTagsGroup.children.toList().filterIsInstance<Chip>().filter {
-                        it.isChecked
-                    }.map { it.text.toString() }
-                viewModel.setHobbies(hobbies)
+                viewModel.saveTagsToWizard()
                 navController.navigate(R.id.action_tags_to_summary)
             }
-            tagsLoader.loadChipInto(chipHobbiesTagsGroup)
+            viewModel.initHobbies()
+
+            tagsLoader.loadChipInto(
+                chipHobbiesTagsGroup, onChipClicked = { chip ->
+                    toggleChip(chip)
+                }, checkedChips = viewModel.selectedTags.value
+            )
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.isTagsEmpty.collect { isEmpty ->
+                    btnTagsNext.isEnabled = !isEmpty
+                }
+            }
         }
     }
+
+    private fun toggleChip(chip: Chip) {
+        viewModel.toggleChip(chip.text.toString())
+    }
+
 }
