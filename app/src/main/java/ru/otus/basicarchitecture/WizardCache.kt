@@ -16,7 +16,10 @@ data class WizardUser(
 data class WizardAddress(
     val country: String,
     val city: String,
-    val address: String
+    val address: String,
+    val value: String = "",
+    val house: String = "",
+    val street: String = ""
 )
 
 fun WizardAddress.toText(): String {

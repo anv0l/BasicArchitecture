@@ -11,7 +11,6 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import ru.otus.basicarchitecture.R
-import ru.otus.basicarchitecture.WizardAddress
 import ru.otus.basicarchitecture.databinding.FragmentAddressBinding
 import ru.otus.basicarchitecture.helpers.navController
 
@@ -20,6 +19,7 @@ class FragmentAddress : Fragment() {
     private lateinit var binding: FragmentAddressBinding
 
     private val viewModel: AddressViewModel by viewModels()
+    private lateinit var adapter: AddressAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupBindings()
@@ -55,25 +55,45 @@ class FragmentAddress : Fragment() {
 
             viewModel.initAddress()
             viewModel.address.value.let {
+                viewModel.setStateDataIsSet()
                 txtAddress.setText(it?.address)
-                txtCity.setText(it?.city)
-                txtCountry.setText(it?.address)
             }
 
-            txtAddress.doAfterTextChanged { updateAddress() }
-            txtCountry.doAfterTextChanged { updateAddress() }
-            txtCountry.doAfterTextChanged { updateAddress() }
+            txtAddress.doAfterTextChanged {
+                if (viewModel.state.value == State.DataIsSet) {
+                    viewModel.setStateReady()
+                } else if (viewModel.state.value == State.Ready)
+                    findAddress()
+            }
+
+            adapter = AddressAdapter { pos ->
+                val wizardAddress = viewModel.addressSuggestions.value[pos]
+                viewModel.setAddress(wizardAddress)
+                txtAddress.setText(wizardAddress.value)
+            }
+            lstAddressSuggestions.adapter = adapter
+
+            lifecycleScope.launch {
+                viewModel.addressSuggestions.collect { suggestions ->
+                    adapter.setSuggestions(suggestions)
+                }
+            }
+
+            lifecycleScope.launch {
+                viewModel.state.collect { state ->
+                    when (state) {
+                        State.Loading -> viewLoading.visibility = View.VISIBLE
+                        else -> viewLoading.visibility = View.GONE
+                    }
+                }
+            }
         }
     }
 
-    private fun updateAddress() {
-        viewModel.setAddress(
-            WizardAddress(
-                country = binding.txtCountry.text.toString(),
-                city = binding.txtCity.text.toString(),
-                address = binding.txtAddress.text.toString()
-            )
-        )
+    private fun findAddress() {
+        val searchString = binding.txtAddress.text.toString()
+
+        viewModel.getSuggestion(searchString)
     }
 
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
@@ -13,6 +14,7 @@
         android:layout_height="wrap_content"
         android:hint="Country"
         android:paddingTop="10dp"
+        android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -30,6 +32,7 @@
         android:layout_height="wrap_content"
         android:hint="City"
         android:paddingTop="10dp"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/txt_country_container">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -52,8 +55,37 @@
             android:id="@+id/txt_address"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="" />
+            android:text="test" />
     </com.google.android.material.textfield.TextInputLayout>
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/lst_address_suggestions"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toTopOf="@id/btn_address_next"
+        app:layout_constraintTop_toBottomOf="@id/txt_address_container"
+        tools:itemCount="3"
+        tools:listitem="@layout/vh_address_suggestions" />
+
+
+    <LinearLayout
+        android:id="@+id/view_loading"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:alpha="1"
+        android:background="?attr/colorSurface"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="@id/lst_address_suggestions"
+        app:layout_constraintTop_toTopOf="@id/lst_address_suggestions">
+
+        <ProgressBar
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_address_next"
